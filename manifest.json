@@ -1,6 +1,6 @@
 {
-    "name": "My Progressive Web App",
-    "short_name": "My PWA",
+    "name": "C1P-W8A",
+    "short_name": "App",
     "description": "A simple PWA example",
     "start_url": "/C1P-W8A/index.html",
     "display": "standalone",
