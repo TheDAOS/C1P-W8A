@@ -31,20 +31,3 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
-
-function triggerRefresh() {
-  // Trigger the service worker update to fetch the latest content.
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.update(); // Forces the service worker to check for updates
-    });
-  }
-
-  // Simulate content refresh
-  console.log("Refreshing content...");
-  setTimeout(() => {
-    isRefreshing = false;
-    content.innerHTML = "<p>Content has been refreshed from the server.</p>";
-  }, 2000);
-}
-
