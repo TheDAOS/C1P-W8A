@@ -15,9 +15,17 @@
       <p-datepicker v-model="date"></p-datepicker>
       <br /><br />
       {{ date }}
+      <Dock :model="items" :position="position">
+        <template #itemicon="{ item }">
+          <img v-tooltip.top="item.label" :alt="item.label" :src="item.icon" style="width: 100%" />
+        </template>
+      </Dock>
     </div>
 
     <script>
+    
+      import Dock from 'primevue/dock';
+      
       const { createApp, ref } = Vue;
 
       const app = createApp({
