@@ -78,36 +78,6 @@
 </template>
 <script setup></script>
 
-
-    <div id="app">
-      <p-datepicker v-model="date"></p-datepicker>
-      <br /><br />
-      {{ date }}
-    </div>
-
-    <script>
-      
-      const { createApp, ref } = Vue;
-
-      const app = createApp({
-        setup() {
-          const date = ref();
-
-          return {
-            date
-          };
-        },
-      });
-
-      app.use(PrimeVue.Config, {
-        theme: {
-            preset: PrimeVue.Themes.Aura
-        }
-      });
-
-      app.component('p-datepicker', PrimeVue.DatePicker);
-
-      app.mount('#app');
-    </script>
+    
   </body>
 </html>
