@@ -3,36 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vue Timer - Dark Mode</title>
+  <title>Vue Timer with iOS PWA Notification</title>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <link rel="manifest" href="manifest.json">
   <style>
-    /* General body and layout */
     body {
       font-family: Arial, sans-serif;
-      background-color: #121212; /* Dark background */
+      background-color: #121212;
+      color: white;
       margin: 0;
       padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      color: white; /* White text for better contrast */
-      box-sizing: border-box;
     }
 
-    /* Main app container */
     #app {
-      background: #1e1e1e; /* Dark card background */
+      background: #1e1e1e;
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       padding: 20px;
+      text-align: center;
       width: 90%;
       max-width: 400px;
-      text-align: center;
     }
 
     h1 {
-      color: #f5f5f5; /* Lighter color for the title */
+      color: #f5f5f5;
       font-size: 1.5rem;
       margin-bottom: 20px;
     }
@@ -41,7 +39,7 @@
       font-size: 2rem;
       font-weight: bold;
       margin-bottom: 30px;
-      color: #f5f5f5; /* Lighter text for time */
+      color: #f5f5f5;
     }
 
     button {
@@ -53,52 +51,26 @@
       margin: 10px 0;
       cursor: pointer;
       transition: background-color 0.3s;
-      color: white; /* Button text color */
     }
 
-    button:hover {
-      background-color: #007bff; /* Accent color on hover */
-    }
-
-    /* Start button (green) */
     .start {
       background-color: #28a745;
     }
 
-    /* Stop button (red) */
     .stop {
       background-color: #dc3545;
     }
 
-    /* Reset button (yellow) */
     .reset {
       background-color: #ffc107;
-    }
-
-    /* Responsive Styles for smaller screens */
-    @media (max-width: 600px) {
-      #app {
-        padding: 20px;
-      }
-
-      p {
-        font-size: 2.5rem;
-      }
-
-      button {
-        font-size: 1.4rem;
-        padding: 15px;
-      }
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <h1>Vue Timer</h1>
-    <!-- Display time in HH:MM:SS format -->
+    <h1>Vue Timer with Notification</h1>
     <p>{{ formatTime(hours) }}:{{ formatTime(minutes) }}:{{ formatTime(seconds) }}</p>
 
-    <!-- Start/Stop/Reset Buttons -->
     <button @click="startTimer" v-if="!isRunning" class="start">Start</button>
     <button @click="stopTimer" v-if="isRunning" class="stop">Stop</button>
     <button @click="resetTimer" class="reset">Reset</button>
@@ -115,7 +87,6 @@
         timer: null
       },
       methods: {
-        // Start the timer
         startTimer() {
           if (this.isRunning) return;
 
@@ -132,16 +103,19 @@
             } else {
               this.seconds++;
             }
+
+            // Check if timer reaches zero (notification)
+            if (this.hours === 0 && this.minutes === 0 && this.seconds === 0) {
+              this.sendNotification("Time's up!", "Your timer has finished.");
+            }
           }, 1000);
         },
 
-        // Stop the timer
         stopTimer() {
           clearInterval(this.timer);
           this.isRunning = false;
         },
 
-        // Reset the timer
         resetTimer() {
           this.stopTimer();
           this.hours = 0;
@@ -149,12 +123,47 @@
           this.seconds = 0;
         },
 
-        // Format time to always show two digits
         formatTime(time) {
           return time < 10 ? '0' + time : time;
+        },
+
+        // Request permission for notifications
+        requestNotificationPermission() {
+          if ('Notification' in window && navigator.serviceWorker) {
+            Notification.requestPermission(permission => {
+              if (permission === 'granted') {
+                console.log('Notification permission granted.');
+              }
+            });
+          }
+        },
+
+        // Trigger the notification
+        sendNotification(title, message) {
+          if (Notification.permission === 'granted') {
+            new Notification(title, {
+              body: message,
+              icon: '/icon.png', // You can replace this with your app's icon
+            });
+          }
         }
+      },
+      mounted() {
+        // Ask for notification permission when the app is mounted
+        this.requestNotificationPermission();
       }
     });
+  </script>
+
+  <!-- Register the Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(registration => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch(error => {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
   </script>
 </body>
 </html>
