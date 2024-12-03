@@ -1,50 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>PrimeVue + CDN</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <!-- PrimeVue and theme CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/primevue/resources/themes/aura/theme.css" />
-    <link rel="stylesheet" href="https://unpkg.com/primevue/resources/primevue.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
-  </head>
-  <body>
-    <div id="app"></div> <!-- Vue mount point -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CiP-W8A</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    .elapsed-container {
+      width: 300px;
+    }
 
-    <!-- Include Vue and PrimeVue -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://unpkg.com/primevue/umd/primevue.min.js"></script>
-    <script src="https://unpkg.com/primevue/button/umd/button.min.js"></script>
+    .elapsed-bar {
+      background-color: red;
+      height: 10px;
+    }
 
-    <script>
-      const { createApp } = Vue;
+  </style>
+</head>
+<body>
+  <!--
+    https://eugenkiss.github.io/7guis/tasks/#timer
+  -->
 
-      // Create a Vue app instance
-      const app = createApp({
-        template: `
-          <div class="bg-surface-0 dark:bg-surface-950 px-6 py-20 md:px-12 lg:px-20">
-            <div class="text-surface-700 dark:text-surface-100 text-center">
-                <div class="text-primary font-bold mb-4">
-                    <i class="pi pi-discord" />&nbsp;POWERED BY DISCORD
-                </div>
-                <div class="text-surface-900 dark:text-surface-0 font-bold text-5xl mb-4">
-                    Join Our Design Community
-                </div>
-                <div class="text-surface-700 dark:text-surface-100 text-2xl mb-8">
-                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit numquam eligendi quos.
-                </div>
-                <Button label="Join Now" icon="pi pi-discord" raised rounded class="font-bold px-8 py-4 whitespace-nowrap" />
-            </div>
-          </div>
-        `,
-      });
-
-      // Import the Button component from PrimeVue and register it
-      app.component('Button', PrimeVue.Button);
-
-      // Mount the app
-      app.mount('#app');
-    </script>
-  </body>
+  <script type="module">
+  import { createApp } from 'vue'
+  
+  createApp({
+    data() {
+      return {
+        duration: 15 * 1000,
+        elapsed: 0
+      }
+    },
+    created() {
+      this.reset()
+    },
+    unmounted() {
+      cancelAnimationFrame(this.handle)
+    },
+    computed: {
+      progressRate() {
+        return Math.min(this.elapsed / this.duration, 1)
+      }
+    },
+    methods: {
+      update() {
+        this.elapsed = performance.now() - this.lastTime
+        if (this.elapsed >= this.duration) {
+          cancelAnimationFrame(this.handle)
+        } else {
+          this.handle = requestAnimationFrame(this.update)
+        }
+      },
+      reset() {
+        this.elapsed = 0
+        this.lastTime = performance.now()
+        this.update()
+      }
+    }
+  }).mount('#app')
+  </script>
+  
+  <div id="app">
+    <label
+      >Elapsed Time: <progress :value="progressRate"></progress
+    ></label>
+  
+    <div>{{ (elapsed / 1000).toFixed(1) }}s</div>
+  
+    <div>
+      Duration: <input type="range" v-model="duration" min="1" max="30000">
+      {{ (duration / 1000).toFixed(1) }}s
+    </div>
+  
+    <button @click="reset">Reset</button>
+  </div>
+</body>
 </html>
