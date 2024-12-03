@@ -23,57 +23,62 @@
   -->
 
   <script type="module">
-  import { createApp } from 'vue'
-  
-  createApp({
-    data() {
-      return {
-        duration: 15 * 1000,
-        elapsed: 0
-      }
-    },
-    created() {
-      this.reset()
-    },
-    unmounted() {
-      cancelAnimationFrame(this.handle)
-    },
-    computed: {
-      progressRate() {
-        return Math.min(this.elapsed / this.duration, 1)
-      }
-    },
-    methods: {
-      update() {
-        this.elapsed = performance.now() - this.lastTime
-        if (this.elapsed >= this.duration) {
-          cancelAnimationFrame(this.handle)
-        } else {
-          this.handle = requestAnimationFrame(this.update)
+    import { createApp, ref, onUnmounted, computed } from 'vue'
+    createApp({
+      setup() {
+        const duration = ref(15 * 1000)
+        const elapsed = ref(0)
+    
+        let lastTime
+        let handle
+    
+        const update = () => {
+          elapsed.value = performance.now() - lastTime
+          if (elapsed.value >= duration.value) {
+            cancelAnimationFrame(handle)
+          } else {
+            handle = requestAnimationFrame(update)
+          }
         }
-      },
-      reset() {
-        this.elapsed = 0
-        this.lastTime = performance.now()
-        this.update()
+    
+        const reset = () => {
+          elapsed.value = 0
+          lastTime = performance.now()
+          update()
+        }
+    
+        const progressRate = computed(() =>
+          Math.min(elapsed.value / duration.value, 1)
+        )
+    
+        reset()
+    
+        onUnmounted(() => {
+          cancelAnimationFrame(handle)
+        })
+        return {
+          duration,
+          elapsed,
+          progressRate,
+          reset
+        }
       }
-    }
-  }).mount('#app')
-  </script>
-  
-  <div id="app">
-    <label
-      >Elapsed Time: <progress :value="progressRate"></progress
-    ></label>
-  
-    <div>{{ (elapsed / 1000).toFixed(1) }}s</div>
-  
-    <div>
-      Duration: <input type="range" v-model="duration" min="1" max="30000">
-      {{ (duration / 1000).toFixed(1) }}s
+    }).mount('#app')
+    </script>
+    
+    <div id="app">
+      <label
+        >Elapsed Time: <progress :value="progressRate"></progress
+      ></label>
+    
+      <div>{{ (elapsed / 1000).toFixed(1) }}s</div>
+    
+      <div>
+        Duration: <input type="range" v-model="duration" min="1" max="30000">
+        {{ (duration / 1000).toFixed(1) }}s
+      </div>
+    
+      <button @click="reset">Reset</button>
     </div>
-  
-    <button @click="reset">Reset</button>
-  </div>
 </body>
 </html>
