@@ -31,3 +31,14 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+self.addEventListener('push', function(event) {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Default Title';
+  const options = {
+    body: data.body || 'Default Body',
+    icon: 'icons/icon-512x512.png', // You can change the icon URL
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
